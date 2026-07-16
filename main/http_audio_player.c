@@ -15,6 +15,7 @@
 #include "freertos/stream_buffer.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
+#include "web_audio_server.h"
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_MAX_RETRIES 10
@@ -65,6 +66,10 @@ static void wifi_event_handler(void *arg, esp_event_base_t base, int32_t id, voi
         ESP_LOGI(TAG, "Wi-Fi conectado, IP=" IPSTR, IP2STR(&event->ip_info.ip));
         s_wifi_retries = 0;
         xEventGroupSetBits(s_wifi_events, WIFI_CONNECTED_BIT);
+        esp_err_t web_err = web_audio_server_start();
+        if (web_err != ESP_OK) {
+            ESP_LOGE(TAG, "falha ao iniciar servidor web: %s", esp_err_to_name(web_err));
+        }
     }
 }
 

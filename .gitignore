@@ -1,9 +1,11 @@
 /build/
+/build-*/
 /sdkconfig
 /examples/star_wars_test/build/
 /examples/star_wars_test/sdkconfig
 *.log
 __pycache__/
 .pytest_cache/
+**/.pytest_tmp/
 .venv/
 *.py[cod]
