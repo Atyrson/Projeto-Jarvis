@@ -25,6 +25,8 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - `7e068b1` — auditoria da Fase 1.
 - `8fbfd35` — criação deste arquivo de memória operacional.
 - `b3e07fe` — página móvel, servidor web e proxy de upload da ESP32.
+- `23244a4` — auditoria das Fases 2 e 3.
+- `3e14e9a` — FFmpeg/ffprobe, normalização e integração real com Whisper.
 
 ## Ambiente local
 
@@ -33,7 +35,9 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - Requirements instalados a partir de `backend/requirements.txt`.
 - Torch: 2.13.0+cpu; openai-whisper: 20250625.
 - `python` não está no `PATH`; usar sempre o caminho absoluto acima.
-- FFmpeg/ffprobe ainda não estavam no `PATH` ao concluir a Fase 3.
+- FFmpeg/ffprobe 8.1.2 portáteis: `C:\tmp\ffmpeg\ffmpeg-8.1.2-essentials_build\bin`.
+- Modelo Whisper base em cache: `C:\tmp\whisper-cache`.
+- Variáveis úteis: `FFMPEG_BIN`, `FFPROBE_BIN` e `STT_MODEL_DIR`.
 - ESP-IDF: 5.5.4 em `C:\Espressif\v5.5.4\esp-idf`.
 - Perfil IDF: `C:\Espressif\tools\Microsoft.v5.5.4.PowerShell_profile.ps1`.
 - O perfil exige PowerShell com `-ExecutionPolicy Bypass` e acesso fora do sandbox,
@@ -75,6 +79,8 @@ idf.py -B build-audio-cellular build
 - Fases 2–3 concluídas em software: página móvel, servidor HTTP da ESP32 e
   proxy de 4 KiB; build ESP-IDF aprovado com imagem de 920.048 bytes.
 - Após as Fases 2–3: 45 testes passavam.
+- Fase 4 concluída: WAV e MP3 normalizam para mono 16 kHz; teste real do
+  Whisper base aprovado. Suíte rápida: 53 testes; teste real: 1.
 
 ## Contratos e decisões que não devem regredir
 
