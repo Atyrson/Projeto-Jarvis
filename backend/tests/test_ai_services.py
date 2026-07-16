@@ -126,3 +126,4 @@ def test_llm_and_tts_credentials_are_loaded_separately(monkeypatch) -> None:
     assert loaded.tts_api_key == "openai-test-key"
     assert loaded.llm_base_url == "https://api.deepseek.com"
     assert loaded.tts_base_url == "https://api.openai.com/v1"
+    assert loaded.tts_model == "gpt-4o-mini-tts"

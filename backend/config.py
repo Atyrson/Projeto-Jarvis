@@ -36,7 +36,7 @@ class AudioInputConfig:
     ai_timeout_seconds: float = 60.0
     llm_model: str = "deepseek-v4-flash"
     llm_max_output_tokens: int = 200
-    tts_model: str = "tts-1"
+    tts_model: str = "gpt-4o-mini-tts"
     tts_voice: str = "alloy"
     cleanup_interval_seconds: float = 300.0
     abandoned_file_age_seconds: float = 900.0
@@ -105,7 +105,7 @@ class AudioInputConfig:
             ai_timeout_seconds=float(os.getenv("AI_TIMEOUT_SECONDS", "60")),
             llm_model=os.getenv("LLM_MODEL", "deepseek-v4-flash"),
             llm_max_output_tokens=_positive_int("LLM_MAX_OUTPUT_TOKENS", 200),
-            tts_model=os.getenv("TTS_MODEL", "tts-1"),
+            tts_model=os.getenv("TTS_MODEL", "gpt-4o-mini-tts"),
             tts_voice=os.getenv("TTS_VOICE", "alloy"),
             cleanup_interval_seconds=float(
                 os.getenv("AUDIO_CLEANUP_INTERVAL_SECONDS", "300")
