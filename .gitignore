@@ -3,3 +3,7 @@
 /examples/star_wars_test/build/
 /examples/star_wars_test/sdkconfig
 *.log
+__pycache__/
+.pytest_cache/
+.venv/
+*.py[cod]
