@@ -19,6 +19,7 @@
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_MAX_RETRIES 10
 #define HTTP_READ_BYTES 2048
+#define HTTP_TIMEOUT_MS 35000
 #define DAC_WRITE_SAMPLES 1024
 #define HTTP_RECONNECT_DELAY_MS 1000
 #define STRINGIFY_INNER(value) #value
@@ -143,7 +144,8 @@ static void http_stream_once(void)
 {
     esp_http_client_config_t cfg = {
         .url = CONFIG_AUDIO_STREAM_URL,
-        .timeout_ms = 5000,
+        /* O backend faz long-poll por ate 30 s antes de responder 204. */
+        .timeout_ms = HTTP_TIMEOUT_MS,
         .buffer_size = HTTP_READ_BYTES,
         .user_agent = "esp32-http-audio/1.0",
         .keep_alive_enable = true,

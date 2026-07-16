@@ -1,0 +1,1 @@
+"""Utilitarios puros do backend."""
