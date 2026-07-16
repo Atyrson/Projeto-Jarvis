@@ -2,6 +2,7 @@ import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 
+import httpx
 import pytest
 
 from app import create_app
@@ -206,10 +207,20 @@ def test_full_pipeline_enqueues_pcm_and_cleans_temporary_files(
         pipeline.submit("a" * 32)
         await pipeline.wait("a" * 32)
         job = await store.get("a" * 32)
-        pcm = b"".join([chunk async for chunk in queue.consume()])
+        application = create_app(
+            audio_queue=queue,
+            audio_input_config=AudioInputConfig(
+                input_dir=tmp_path, device_token="test"
+            ),
+            audio_pipeline=pipeline,
+        )
+        transport = httpx.ASGITransport(app=application)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/audio/stream")
 
         assert job is not None and job.status == AudioJobStatus.QUEUED
-        assert pcm == b"\x00\x01\x02\x03"
+        assert response.status_code == 200
+        assert response.content == b"\x00\x01\x02\x03"
         assert llm.inputs == ["transcricao secreta"]
         assert tts.inputs == ["resposta secreta"]
         assert not list(tmp_path.iterdir())
