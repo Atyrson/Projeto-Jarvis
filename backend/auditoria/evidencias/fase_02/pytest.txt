@@ -1,0 +1,4 @@
+Comando: C:\tmp\python312\python.exe -m pytest tests -q --basetemp .pytest_tmp
+
+.............................................                            [100%]
+45 passed in 3.34s

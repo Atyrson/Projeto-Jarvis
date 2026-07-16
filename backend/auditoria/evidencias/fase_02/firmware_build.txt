@@ -1,0 +1,8 @@
+ESP-IDF v5.5.4
+Comando: idf.py -B build-audio-cellular build
+Resultado: Project build complete.
+Imagem: build-audio-cellular/http_audio_player.bin
+Tamanho: 0xe09f0 bytes (920048)
+Partição mínima: 0x100000 bytes
+Livre: 0x1f610 bytes (12%)
+SHA-256: 63f73a0c13593d18eeb5865bf7b80506068f374ae2babb3dd399e6d377a24fb5

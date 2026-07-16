@@ -23,6 +23,8 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - `7010599` — auditoria da Fase 0 e versionamento do plano.
 - `9b384aa` — upload progressivo no backend.
 - `7e068b1` — auditoria da Fase 1.
+- `8fbfd35` — criação deste arquivo de memória operacional.
+- `b3e07fe` — página móvel, servidor web e proxy de upload da ESP32.
 
 ## Ambiente local
 
@@ -31,7 +33,7 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - Requirements instalados a partir de `backend/requirements.txt`.
 - Torch: 2.13.0+cpu; openai-whisper: 20250625.
 - `python` não está no `PATH`; usar sempre o caminho absoluto acima.
-- FFmpeg/ffprobe ainda não estavam no `PATH ao concluir a Fase 1`.
+- FFmpeg/ffprobe ainda não estavam no `PATH` ao concluir a Fase 3.
 - ESP-IDF: 5.5.4 em `C:\Espressif\v5.5.4\esp-idf`.
 - Perfil IDF: `C:\Espressif\tools\Microsoft.v5.5.4.PowerShell_profile.ps1`.
 - O perfil exige PowerShell com `-ExecutionPolicy Bypass` e acesso fora do sandbox,
@@ -70,7 +72,9 @@ idf.py -B build-audio-cellular build
   autenticação por token, allowlist MIME, limite, `.part`, SHA-256 incremental,
   promoção para `.upload`, limpeza e um upload concorrente.
 - Após a Fase 1: 41 testes passavam.
-- Fases 2–3 em andamento: página móvel, servidor HTTP da ESP32 e proxy de 4 KiB.
+- Fases 2–3 concluídas em software: página móvel, servidor HTTP da ESP32 e
+  proxy de 4 KiB; build ESP-IDF aprovado com imagem de 920.048 bytes.
+- Após as Fases 2–3: 45 testes passavam.
 
 ## Contratos e decisões que não devem regredir
 

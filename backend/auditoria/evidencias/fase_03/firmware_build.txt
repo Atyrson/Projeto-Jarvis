@@ -1,0 +1,7 @@
+ESP-IDF v5.5.4
+Componentes confirmados: esp_http_client, esp_http_server, esp_timer
+Objetos confirmados: audio_upload_proxy.c.obj, web_audio_server.c.obj
+Resultado final: Project build complete.
+Buffer configurado: 4096 bytes
+Imagem: 920048 bytes
+SHA-256: 63f73a0c13593d18eeb5865bf7b80506068f374ae2babb3dd399e6d377a24fb5
