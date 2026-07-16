@@ -24,7 +24,12 @@ logger = logging.getLogger(__name__)
 def _whisper_factory() -> Transcriber:
     from services.stt.whisper_transcriber import WhisperTranscriber
 
-    return WhisperTranscriber(os.getenv("STT_MODEL", "base"))
+    model_dir = os.getenv("STT_MODEL_DIR")
+    return WhisperTranscriber(
+        os.getenv("STT_MODEL", "base"),
+        download_root=model_dir or None,
+        ffmpeg_bin=os.getenv("FFMPEG_BIN", "ffmpeg"),
+    )
 
 
 def create_app(

@@ -6,6 +6,6 @@
 *.log
 __pycache__/
 .pytest_cache/
-**/.pytest_tmp/
+**/.pytest*_tmp/
 .venv/
 *.py[cod]
