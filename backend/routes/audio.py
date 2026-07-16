@@ -1,17 +1,16 @@
-"""Endpoints HTTP para enfileirar e consumir audio PCM."""
+"""Endpoints HTTP para enfileirar, consumir e diagnosticar audio."""
 
 from __future__ import annotations
 
 import logging
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Header, Request, Body
+from fastapi import APIRouter, Body, Header, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from services.audio_queue import AudioQueue
+from services.stt.transcription_service import TranscriptionService
 from utils.pcm import strip_wav_header, validate_pcm
-
-from services.stt.whisper_transcriber import WhisperTranscriber
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -19,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 def _queue(request: Request) -> AudioQueue:
     return request.app.state.audio_queue
+
+
+def _transcription_service(request: Request) -> TranscriptionService | None:
+    return getattr(request.app.state, "transcription_service", None)
 
 
 @router.post("/queue", status_code=202)
@@ -81,16 +84,24 @@ async def health(request: Request) -> dict[str, object]:
         "stream_active": audio_queue.stream_active,
     }
 
-transcriber = WhisperTranscriber()
 
 @router.post("/transcribe")
-async def transcribe_audio(audio_path: str = Body(..., embed=True)): 
+async def transcribe_audio(
+    request: Request, audio_path: str = Body(..., embed=True)
+) -> Response:
+    """Endpoint diagnostico temporario; o pipeline usa caminhos internos."""
+
+    service = _transcription_service(request)
+    if service is None:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "servico STT indisponivel"},
+        )
     try:
-        # Passa o caminho do áudio recebido para o transcritor
-        text = transcriber.transcribe(audio_path)
-        return {"status": "success", "text": text}
-    
-    except FileNotFoundError as e:
-        return JSONResponse(status_code=404, content={str(e)})
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"Erro ao transcrever": str(e)})
+        text = await service.transcribe_async(audio_path)
+        return JSONResponse(content={"status": "success", "text": text})
+    except FileNotFoundError as exc:
+        return JSONResponse(status_code=404, content={"error": str(exc)})
+    except Exception:
+        logger.exception("event=stt.diagnostic_failed")
+        return JSONResponse(status_code=500, content={"error": "falha na transcricao"})
