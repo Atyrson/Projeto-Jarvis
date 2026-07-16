@@ -14,6 +14,7 @@ from config import AudioInputConfig
 from routes.audio import router as audio_router
 from routes.audio_input import router as audio_input_router
 from models.audio_input import AudioJobStore
+from services.audio_cleanup import AudioCleanupService
 from services.audio_queue import AudioQueue
 from services.audio_converter import AudioConverter
 from services.audio_pipeline import AudioPipeline, AudioTranscriptionStage
@@ -55,11 +56,13 @@ def create_app(
     audio_pipeline: object | None = None,
     llm_service: LLMService | None = None,
     tts_service: TTSService | None = None,
+    audio_cleanup_service: AudioCleanupService | None = None,
 ) -> FastAPI:
     """Cria a aplicacao com dependencias substituiveis nos testes."""
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        await application.state.audio_cleanup_service.start()
         if application.state.transcription_service is None and load_stt:
             factory = transcriber_factory or _whisper_factory
             try:
@@ -107,10 +110,13 @@ def create_app(
         try:
             yield
         finally:
+            logger.info("event=service.shutdown_started component=backend")
             pipeline = application.state.audio_pipeline
             shutdown = getattr(pipeline, "shutdown", None)
             if shutdown is not None:
                 await shutdown()
+            await application.state.audio_cleanup_service.shutdown()
+            logger.info("event=service.shutdown_completed component=backend")
 
     config = audio_input_config or (
         audio_upload_service.config
@@ -122,6 +128,10 @@ def create_app(
     application.state.transcription_service = transcription_service
     application.state.audio_upload_service = audio_upload_service or AudioUploadService(
         config, AudioJobStore()
+    )
+    application.state.audio_cleanup_service = (
+        audio_cleanup_service
+        or AudioCleanupService(config, application.state.audio_upload_service.jobs)
     )
     application.state.audio_pipeline = audio_pipeline
     application.include_router(audio_router)

@@ -36,6 +36,9 @@ class AudioInputConfig:
     llm_max_output_tokens: int = 200
     tts_model: str = "tts-1"
     tts_voice: str = "alloy"
+    cleanup_interval_seconds: float = 300.0
+    abandoned_file_age_seconds: float = 900.0
+    job_retention_seconds: float = 3600.0
     allowed_mime_types: frozenset[str] = frozenset(
         {
             "audio/aac",
@@ -59,6 +62,9 @@ class AudioInputConfig:
             or self.stt_timeout_seconds <= 0
             or self.media_timeout_seconds <= 0
             or self.ai_timeout_seconds <= 0
+            or self.cleanup_interval_seconds <= 0
+            or self.abandoned_file_age_seconds <= 0
+            or self.job_retention_seconds <= 0
         ):
             raise ValueError("timeouts e duracao devem ser maiores que zero")
         if self.llm_max_output_tokens <= 0:
@@ -93,4 +99,13 @@ class AudioInputConfig:
             llm_max_output_tokens=_positive_int("LLM_MAX_OUTPUT_TOKENS", 200),
             tts_model=os.getenv("TTS_MODEL", "tts-1"),
             tts_voice=os.getenv("TTS_VOICE", "alloy"),
+            cleanup_interval_seconds=float(
+                os.getenv("AUDIO_CLEANUP_INTERVAL_SECONDS", "300")
+            ),
+            abandoned_file_age_seconds=float(
+                os.getenv("AUDIO_ABANDONED_FILE_AGE_SECONDS", "900")
+            ),
+            job_retention_seconds=float(
+                os.getenv("AUDIO_JOB_RETENTION_SECONDS", "3600")
+            ),
         )

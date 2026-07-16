@@ -86,3 +86,20 @@ async def stream_pcm(response, pcm_chunks):
 
 Nao envie MP3, WAV, Opus ou JSON neste endpoint. Codecs comprimidos exigem um
 decoder adicional e mais RAM/CPU no ESP32.
+
+## 3. Gravação pelo celular
+
+O firmware também serve uma página no IP recebido pela ESP32. Abra esse IP no
+celular, escolha/grave um áudio e toque em **Enviar pela ESP32**. O navegador
+envia o arquivo diretamente para `POST /api/audio/input`; a placa o encaminha
+ao backend com um buffer reutilizável de 4 KiB.
+
+Configure em `idf.py menuconfig`, no menu `HTTP audio player`:
+
+- `Backend audio input URL`: `http://IP_DO_COMPUTADOR:8000/audio/input`;
+- `Backend device token`: o mesmo `AUDIO_INPUT_DEVICE_TOKEN` do backend;
+- limite de upload, buffer, timeout e porta do servidor web.
+
+O token nunca é inserido na página. Não versione `sdkconfig`, pois ele pode
+conter Wi-Fi e token. Somente um upload é aceito por vez (`409` no segundo); o
+player HTTP continua em tarefa separada.

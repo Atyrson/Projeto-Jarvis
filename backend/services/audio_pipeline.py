@@ -186,11 +186,23 @@ class AudioPipeline:
                     job_id,
                     error_code,
                 )
+        except asyncio.CancelledError:
+            job = await self.jobs.get(job_id)
+            if job is not None and job.status != AudioJobStatus.QUEUED:
+                await self.jobs.update(
+                    job_id, status=AudioJobStatus.FAILED, error="pipeline_cancelled"
+                )
+            logger.warning(
+                "event=pipeline.failed job_id=%s error_code=pipeline_cancelled result=cancelled",
+                job_id,
+            )
+            raise
         finally:
             for path in (original, normalized, tts_path, pcm_path):
                 path.unlink(missing_ok=True)
 
     async def shutdown(self) -> None:
+        logger.info("event=service.shutdown_started component=audio_pipeline")
         tasks = tuple(self._tasks.values())
         for task in tasks:
             task.cancel()
@@ -200,3 +212,4 @@ class AudioPipeline:
             close = getattr(service, "aclose", None)
             if close is not None:
                 await close()
+        logger.info("event=service.shutdown_completed component=audio_pipeline")

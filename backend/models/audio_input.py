@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 class AudioJobStatus(str, Enum):
@@ -69,8 +72,30 @@ class AudioJobStore:
             current = self._jobs[job_id]
             updated = replace(current, updated_at=datetime.now(UTC), **changes)
             self._jobs[job_id] = updated
+            if updated.status != current.status:
+                logger.info(
+                    "event=job.status_changed request_id=%s job_id=%s device_id=%s "
+                    "previous=%s status=%s",
+                    updated.request_id,
+                    job_id,
+                    updated.device_id,
+                    current.status.value,
+                    updated.status.value,
+                )
             return updated
 
     async def snapshot(self) -> tuple[AudioJob, ...]:
         async with self._lock:
             return tuple(self._jobs.values())
+
+    async def prune(self, *, older_than: datetime) -> tuple[str, ...]:
+        terminal = {AudioJobStatus.QUEUED, AudioJobStatus.FAILED}
+        async with self._lock:
+            removed = tuple(
+                job_id
+                for job_id, job in self._jobs.items()
+                if job.status in terminal and job.updated_at < older_than
+            )
+            for job_id in removed:
+                del self._jobs[job_id]
+            return removed

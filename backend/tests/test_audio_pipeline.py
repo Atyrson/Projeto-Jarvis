@@ -263,3 +263,32 @@ def test_lifespan_builds_pipeline_from_injected_services(tmp_path: Path) -> None
             assert isinstance(application.state.audio_pipeline, AudioPipeline)
 
     asyncio.run(scenario())
+
+
+def test_shutdown_cancels_active_pipeline_and_cleans_files(tmp_path: Path) -> None:
+    class BlockingLLM(FakeLLM):
+        def __init__(self) -> None:
+            super().__init__()
+            self.started = asyncio.Event()
+
+        async def generate(self, transcription: str) -> str:
+            self.started.set()
+            await asyncio.Event().wait()
+            return "unreachable"
+
+    async def scenario() -> None:
+        store = AudioJobStore()
+        await accepted_job(tmp_path, store)
+        llm = BlockingLLM()
+        pipeline = full_pipeline(
+            tmp_path, store, AudioQueue(), llm, FakeTTS()
+        )
+        pipeline.submit("a" * 32)
+        await llm.started.wait()
+        await pipeline.shutdown()
+        job = await store.get("a" * 32)
+        assert job is not None and job.status == AudioJobStatus.FAILED
+        assert job.error == "pipeline_cancelled"
+        assert not list(tmp_path.iterdir())
+
+    asyncio.run(scenario())

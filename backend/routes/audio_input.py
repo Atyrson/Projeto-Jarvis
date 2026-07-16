@@ -73,6 +73,13 @@ async def upload_audio(
             content_type=media_type,
         )
     except AudioUploadError as exc:
+        if exc.status_code == 409:
+            logger.warning(
+                "event=rate_limit.rejected request_id=%s device_id=%s error_code=%s",
+                request_id,
+                device_id,
+                exc.error_code,
+            )
         return _reject(exc.status_code, str(exc))
     except Exception:
         logger.exception("event=upload.failed request_id=%s", request_id)
