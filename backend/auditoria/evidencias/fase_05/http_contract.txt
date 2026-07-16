@@ -1,0 +1,18 @@
+LLM: POST /v1/responses
+- Authorization presente no request simulado; valor não registrado
+- model, instructions, input e max_output_tokens verificados
+- output_text aninhado extraído
+
+TTS: POST /v1/audio/speech
+- model, voice, input e response_format=wav verificados
+- bytes WAV retornados ao pipeline
+
+Pipeline fake:
+- LLM recebeu uma transcrição
+- TTS recebeu uma resposta
+- conversor produziu 4 bytes PCM s16le válidos
+- GET /audio/stream retornou exatamente os 4 bytes
+- temporários finais: zero
+- conteúdo textual e segredo nos logs: zero ocorrências
+
+OPENAI_API_KEY: ausente; chamada real não executada.

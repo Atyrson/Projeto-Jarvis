@@ -27,6 +27,9 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - `b3e07fe` — página móvel, servidor web e proxy de upload da ESP32.
 - `23244a4` — auditoria das Fases 2 e 3.
 - `3e14e9a` — FFmpeg/ffprobe, normalização e integração real com Whisper.
+- `701ec5a` — auditoria da Fase 4.
+- `2b387cc` — serviços LLM/TTS e pipeline completo.
+- `8f62b9d` — teste do PCM final por `/audio/stream`.
 
 ## Ambiente local
 
@@ -81,6 +84,11 @@ idf.py -B build-audio-cellular build
 - Após as Fases 2–3: 45 testes passavam.
 - Fase 4 concluída: WAV e MP3 normalizam para mono 16 kHz; teste real do
   Whisper base aprovado. Suíte rápida: 53 testes; teste real: 1.
+- Fase 5 concluída em software: Responses API + Speech API configuráveis,
+  pipeline até `/audio/stream`; 60 testes rápidos. Teste real de provedor
+  pendente porque `OPENAI_API_KEY` não estava configurada.
+- MCP oficial de documentação registrado globalmente como `openaiDeveloperDocs`;
+  uma nova sessão pode ser necessária para expor suas ferramentas.
 
 ## Contratos e decisões que não devem regredir
 
