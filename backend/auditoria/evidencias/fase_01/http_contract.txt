@@ -1,0 +1,15 @@
+POST /audio/input, corpo binário cru e fragmentado
+Content-Type: audio/webm
+X-Source-Device: esp32
+Autenticação: X-Device-Token (valor omitido)
+
+Sucesso: 202, status=accepted, bytes=23, sha256 presente
+Token incorreto: 401
+Upload simultâneo: 409
+Acima do limite: 413
+MIME recusado: 415
+
+Payload original: 23 bytes
+SHA-256 original:      ea5368915ae4a5529d1188a8bfca5c98f7f2e8e5ce0877cc901a7c282df49d28
+SHA-256 reconstruído:  ea5368915ae4a5529d1188a8bfca5c98f7f2e8e5ce0877cc901a7c282df49d28
+Temporários após cancelamento: 0 arquivos .part
