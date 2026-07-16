@@ -20,8 +20,8 @@ from services.audio_converter import AudioConverter
 from services.audio_pipeline import AudioPipeline, AudioTranscriptionStage
 from services.audio_upload import AudioUploadService
 from services.llm_service import (
+    DeepSeekChatLLMService,
     LLMService,
-    OpenAIResponsesLLMService,
     UnavailableLLMService,
 )
 from services.stt.transcription_service import Transcriber, TranscriptionService
@@ -82,14 +82,14 @@ def create_app(
             tts = tts_service
             if llm is None:
                 llm = (
-                    OpenAIResponsesLLMService(config)
-                    if config.ai_api_key
+                    DeepSeekChatLLMService(config)
+                    if config.llm_api_key
                     else UnavailableLLMService()
                 )
             if tts is None:
                 tts = (
                     OpenAISpeechTTSService(config)
-                    if config.ai_api_key
+                    if config.tts_api_key
                     else UnavailableTTSService()
                 )
             stage = AudioTranscriptionStage(

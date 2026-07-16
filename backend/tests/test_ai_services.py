@@ -6,8 +6,8 @@ import pytest
 from config import AudioInputConfig
 from services.llm_service import (
     AIProviderNotConfigured,
+    DeepSeekChatLLMService,
     LLMProviderError,
-    OpenAIResponsesLLMService,
 )
 from services.tts_service import OpenAISpeechTTSService
 
@@ -15,31 +15,39 @@ from services.tts_service import OpenAISpeechTTSService
 def config() -> AudioInputConfig:
     return AudioInputConfig(
         device_token="device",
-        ai_api_key="secret-test-key",
-        ai_base_url="https://provider.test/v1",
+        llm_api_key="secret-test-key",
+        llm_base_url="https://provider.test/v1",
+        tts_api_key="secret-tts-key",
+        tts_base_url="https://provider.test/v1",
         llm_model="test-llm",
         tts_model="test-tts",
         tts_voice="test-voice",
     )
 
 
-def test_responses_service_extracts_text_without_logging_content(caplog) -> None:
+def test_deepseek_service_extracts_text_without_logging_content(caplog) -> None:
     async def scenario() -> None:
         async def handler(request: httpx.Request) -> httpx.Response:
-            assert request.url.path == "/v1/responses"
+            assert request.url.path == "/v1/chat/completions"
             assert request.headers["authorization"] == "Bearer secret-test-key"
             document = __import__("json").loads(request.content)
             assert document["model"] == "test-llm"
-            assert document["input"] == "transcricao muito privada"
+            assert document["messages"][1] == {
+                "role": "user",
+                "content": "transcricao muito privada",
+            }
+            assert document["thinking"] == {"type": "disabled"}
+            assert document["max_tokens"] == 200
+            assert document["stream"] is False
             return httpx.Response(
                 200,
                 json={
-                    "output": [
+                    "choices": [
                         {
-                            "type": "message",
-                            "content": [
-                                {"type": "output_text", "text": "Resposta curta."}
-                            ],
+                            "message": {
+                                "role": "assistant",
+                                "content": "Resposta curta.",
+                            }
                         }
                     ]
                 },
@@ -49,7 +57,7 @@ def test_responses_service_extracts_text_without_logging_content(caplog) -> None
             base_url="https://provider.test/v1/",
             transport=httpx.MockTransport(handler),
         )
-        service = OpenAIResponsesLLMService(config(), client=client)
+        service = DeepSeekChatLLMService(config(), client=client)
         assert await service.generate("transcricao muito privada") == "Resposta curta."
         await client.aclose()
         assert "transcricao muito privada" not in caplog.text
@@ -91,7 +99,7 @@ def test_provider_error_hides_remote_body(caplog) -> None:
             base_url="https://provider.test/v1/",
             transport=httpx.MockTransport(handler),
         )
-        service = OpenAIResponsesLLMService(config(), client=client)
+        service = DeepSeekChatLLMService(config(), client=client)
         with pytest.raises(LLMProviderError) as error:
             await service.generate("private input")
         assert error.value.error_code == "llm_failed"
@@ -105,6 +113,6 @@ def test_provider_error_hides_remote_body(caplog) -> None:
 def test_api_key_is_required() -> None:
     missing = AudioInputConfig(device_token="device")
     with pytest.raises(AIProviderNotConfigured):
-        OpenAIResponsesLLMService(missing)
+        DeepSeekChatLLMService(missing)
     with pytest.raises(AIProviderNotConfigured):
         OpenAISpeechTTSService(missing)

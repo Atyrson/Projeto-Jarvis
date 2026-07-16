@@ -9,3 +9,5 @@ __pycache__/
 **/.pytest*_tmp/
 .venv/
 *.py[cod]
+.env
+.env.local

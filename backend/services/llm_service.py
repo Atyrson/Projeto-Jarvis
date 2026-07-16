@@ -1,4 +1,4 @@
-"""Interface LLM e implementacao HTTP da Responses API."""
+"""Interface LLM e implementacao HTTP da API Chat Completions da DeepSeek."""
 
 from __future__ import annotations
 
@@ -33,19 +33,19 @@ class UnavailableLLMService:
         raise AIProviderNotConfigured("provedor LLM nao configurado")
 
 
-class OpenAIResponsesLLMService:
+class DeepSeekChatLLMService:
     def __init__(
         self,
         config: AudioInputConfig,
         *,
         client: httpx.AsyncClient | None = None,
     ) -> None:
-        if not config.ai_api_key:
-            raise AIProviderNotConfigured("OPENAI_API_KEY ausente")
+        if not config.llm_api_key:
+            raise AIProviderNotConfigured("DEEPSEEK_API_KEY ausente")
         self.config = config
         self._owns_client = client is None
         self._client = client or httpx.AsyncClient(
-            base_url=config.ai_base_url.rstrip("/") + "/",
+            base_url=config.llm_base_url.rstrip("/") + "/",
             timeout=config.ai_timeout_seconds,
         )
 
@@ -54,16 +54,23 @@ class OpenAIResponsesLLMService:
             raise AIProviderError("transcricao vazia")
         try:
             response = await self._client.post(
-                "responses",
-                headers={"Authorization": f"Bearer {self.config.ai_api_key}"},
+                "chat/completions",
+                headers={"Authorization": f"Bearer {self.config.llm_api_key}"},
                 json={
                     "model": self.config.llm_model,
-                    "instructions": (
-                        "Responda em português brasileiro, de forma curta, clara e "
-                        "adequada para ser falada por um alto-falante."
-                    ),
-                    "input": transcription,
-                    "max_output_tokens": self.config.llm_max_output_tokens,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": (
+                                "Responda em português brasileiro, de forma curta, "
+                                "clara e adequada para ser falada por um alto-falante."
+                            ),
+                        },
+                        {"role": "user", "content": transcription},
+                    ],
+                    "thinking": {"type": "disabled"},
+                    "max_tokens": self.config.llm_max_output_tokens,
+                    "stream": False,
                 },
             )
             response.raise_for_status()
@@ -78,26 +85,17 @@ class OpenAIResponsesLLMService:
 
     @staticmethod
     def _extract_text(document: dict[str, object]) -> str:
-        direct = document.get("output_text")
-        if isinstance(direct, str) and direct.strip():
-            return direct.strip()
-        pieces: list[str] = []
-        output = document.get("output")
-        if isinstance(output, list):
-            for item in output:
-                if not isinstance(item, dict):
-                    continue
-                content = item.get("content")
-                if not isinstance(content, list):
-                    continue
-                for part in content:
-                    if (
-                        isinstance(part, dict)
-                        and part.get("type") == "output_text"
-                        and isinstance(part.get("text"), str)
-                    ):
-                        pieces.append(part["text"])
-        return "".join(pieces).strip()
+        choices = document.get("choices")
+        if not isinstance(choices, list) or not choices:
+            return ""
+        choice = choices[0]
+        if not isinstance(choice, dict):
+            return ""
+        message = choice.get("message")
+        if not isinstance(message, dict):
+            return ""
+        content = message.get("content")
+        return content.strip() if isinstance(content, str) else ""
 
     async def aclose(self) -> None:
         if self._owns_client:

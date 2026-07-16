@@ -33,12 +33,12 @@ class OpenAISpeechTTSService:
         *,
         client: httpx.AsyncClient | None = None,
     ) -> None:
-        if not config.ai_api_key:
+        if not config.tts_api_key:
             raise AIProviderNotConfigured("OPENAI_API_KEY ausente")
         self.config = config
         self._owns_client = client is None
         self._client = client or httpx.AsyncClient(
-            base_url=config.ai_base_url.rstrip("/") + "/",
+            base_url=config.tts_base_url.rstrip("/") + "/",
             timeout=config.ai_timeout_seconds,
         )
 
@@ -48,7 +48,7 @@ class OpenAISpeechTTSService:
         try:
             response = await self._client.post(
                 "audio/speech",
-                headers={"Authorization": f"Bearer {self.config.ai_api_key}"},
+                headers={"Authorization": f"Bearer {self.config.tts_api_key}"},
                 json={
                     "model": self.config.tts_model,
                     "voice": self.config.tts_voice,
