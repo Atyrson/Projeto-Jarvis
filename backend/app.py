@@ -10,8 +10,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from config import AudioInputConfig
 from routes.audio import router as audio_router
+from routes.audio_input import router as audio_input_router
+from models.audio_input import AudioJobStore
 from services.audio_queue import AudioQueue
+from services.audio_upload import AudioUploadService
 from services.stt.transcription_service import Transcriber, TranscriptionService
 
 logger = logging.getLogger(__name__)
@@ -29,6 +33,9 @@ def create_app(
     transcription_service: TranscriptionService | None = None,
     transcriber_factory: Callable[[], Transcriber] | None = None,
     load_stt: bool = False,
+    audio_input_config: AudioInputConfig | None = None,
+    audio_upload_service: AudioUploadService | None = None,
+    audio_pipeline: object | None = None,
 ) -> FastAPI:
     """Cria a aplicacao com dependencias substituiveis nos testes."""
 
@@ -49,7 +56,13 @@ def create_app(
     application = FastAPI(title="ESP32 Audio Backend", lifespan=lifespan)
     application.state.audio_queue = audio_queue or AudioQueue()
     application.state.transcription_service = transcription_service
+    config = audio_input_config or AudioInputConfig.from_env()
+    application.state.audio_upload_service = audio_upload_service or AudioUploadService(
+        config, AudioJobStore()
+    )
+    application.state.audio_pipeline = audio_pipeline
     application.include_router(audio_router)
+    application.include_router(audio_input_router)
     return application
 
 

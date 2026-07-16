@@ -2,4 +2,6 @@
 
 AudioChunk = bytes
 
-__all__ = ["AudioChunk"]
+from .audio_input import AudioJob, AudioJobStatus, AudioJobStore
+
+__all__ = ["AudioChunk", "AudioJob", "AudioJobStatus", "AudioJobStore"]
