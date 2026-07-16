@@ -1,0 +1,22 @@
+Upload TCP real fragmentado:
+- tamanho enviado/recebido: 25100 bytes
+- fragmento do cliente: 137 bytes
+- HTTP: 202
+- SHA-256 esperado e reconstruído:
+  F8F6EC27456DA57338E2C8C5C58D8C5633A9C5CC4139122DBEF3B9E52E77CF9D
+- pipeline submetido uma vez com o job_id retornado
+
+Desconexão TCP:
+- Content-Length declarado: 1000
+- conexão fechada após 11 bytes
+- job: failed
+- error_code: upload_failed
+- arquivos .part depois: zero
+- arquivos .upload depois: zero
+
+Carga dentro do limite:
+- 25 uploads sequenciais
+- 65536 bytes por upload
+- total: 1638400 bytes
+- SHA-256 verificado em cada upload
+- temporários depois: zero

@@ -1,0 +1,20 @@
+Backend final — Python 3.12.4
+
+Comando:
+python -m pytest tests -q -m "not stt" --basetemp .pytest_final2_tmp -p no:cacheprovider
+
+Resultado:
+68 passed, 1 skipped, 1 deselected in 4.75s
+
+O skipped é o smoke test DeepSeek opt-in, pois DEEPSEEK_API_KEY não estava
+exportada no processo. O deselected é o teste real Whisper.
+
+pip check:
+No broken requirements found.
+
+Whisper real executado separadamente:
+1 passed, 1 warning in 6.29s
+Aviso esperado: FP16 não suportado em CPU; execução automática em FP32.
+Uma execução instrumentada anterior mediu load=2859 ms, probe=125 ms,
+conversão=125 ms, stt=5672 ms e total=5922 ms para 7296 ms de áudio. O texto
+integral não foi registrado.

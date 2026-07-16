@@ -30,6 +30,10 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - `701ec5a` — auditoria da Fase 4.
 - `2b387cc` — serviços LLM/TTS e pipeline completo.
 - `8f62b9d` — teste do PCM final por `/audio/stream`.
+- `a569aaf` — auditoria do pipeline LLM/TTS.
+- `b94a46e` — limpeza, retenção, shutdown, carga e observabilidade.
+- `6557157` — integração DeepSeek Chat Completions como LLM.
+- `c3f0f16` — contrato, smoke test opt-in e documentação da DeepSeek.
 
 ## Ambiente local
 
@@ -84,9 +88,17 @@ idf.py -B build-audio-cellular build
 - Após as Fases 2–3: 45 testes passavam.
 - Fase 4 concluída: WAV e MP3 normalizam para mono 16 kHz; teste real do
   Whisper base aprovado. Suíte rápida: 53 testes; teste real: 1.
-- Fase 5 concluída em software: Responses API + Speech API configuráveis,
-  pipeline até `/audio/stream`; 60 testes rápidos. Teste real de provedor
-  pendente porque `OPENAI_API_KEY` não estava configurada.
+- Fase 5 concluída em software: DeepSeek Chat Completions para LLM e OpenAI
+  Speech API para TTS, com credenciais separadas; pipeline até
+  `/audio/stream`.
+- Fase 6 concluída em software: cleanup e retenção periódicos, cancelamento no
+  shutdown, eventos correlacionados, testes TCP de fragmentação/desconexão e
+  teste de carga. Suíte final: 68 aprovados; Whisper real: 1 aprovado.
+- A chave DeepSeek foi fornecida na conversa, mas não foi gravada no repositório,
+  arquivo local, comando ou log. Para usá-la, exportar `DEEPSEEK_API_KEY` no
+  processo. O smoke test real exige também `RUN_REAL_DEEPSEEK=1`.
+- O TTS requer outra credencial em `OPENAI_API_KEY`; a chave DeepSeek não deve
+  ser reutilizada para TTS.
 - MCP oficial de documentação registrado globalmente como `openaiDeveloperDocs`;
   uma nova sessão pode ser necessária para expor suas ferramentas.
 
@@ -104,10 +116,13 @@ idf.py -B build-audio-cellular build
 - Saída final do pipeline: PCM s16le, mono, 16 kHz, validado antes de
   `AudioQueue.enqueue()`.
 - Preservar compatibilidade de `/queue`, `/audio/stream` e `/health`.
+- LLM padrão: `deepseek-v4-flash` via `https://api.deepseek.com/chat/completions`,
+  com `thinking` desabilitado para reduzir latência da resposta falada.
 
 ## Pendências de validação física
 
 - Teste real em Android/iOS e captura da página servida pela placa.
 - Logs seriais, heap mínimo/inicial/final e desconexão durante upload.
 - Reprodução física no alto-falante após o pipeline completo.
-- Smoke test real do Whisper `base` após FFmpeg e modelo estarem disponíveis.
+- Smoke test real da DeepSeek depois de exportar a credencial no processo.
+- TTS real depois de fornecer uma chave OpenAI separada.
