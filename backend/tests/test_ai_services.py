@@ -116,3 +116,13 @@ def test_api_key_is_required() -> None:
         DeepSeekChatLLMService(missing)
     with pytest.raises(AIProviderNotConfigured):
         OpenAISpeechTTSService(missing)
+
+
+def test_llm_and_tts_credentials_are_loaded_separately(monkeypatch) -> None:
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "deepseek-test-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "openai-test-key")
+    loaded = AudioInputConfig.from_env()
+    assert loaded.llm_api_key == "deepseek-test-key"
+    assert loaded.tts_api_key == "openai-test-key"
+    assert loaded.llm_base_url == "https://api.deepseek.com"
+    assert loaded.tts_base_url == "https://api.openai.com/v1"

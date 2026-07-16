@@ -16,3 +16,11 @@ Pipeline fake:
 - conteúdo textual e segredo nos logs: zero ocorrências
 
 OPENAI_API_KEY: ausente; chamada real não executada.
+
+Atualização DeepSeek:
+- LLM: POST /chat/completions
+- base URL padrão: https://api.deepseek.com
+- modelo padrão: deepseek-v4-flash
+- messages system/user, thinking=disabled, max_tokens e stream=false verificados
+- DEEPSEEK_API_KEY e OPENAI_API_KEY são independentes
+- contrato HTTP simulado aprovado; segredo real ausente dos arquivos e logs

@@ -89,3 +89,14 @@ chave ou realizar cobrança sem autorização.
 O pipeline completo funciona de forma reproduzível com contratos reais
 simulados e saída PCM compatível; validações com cobrança e hardware permanecem
 explicitamente pendentes de credencial/configuração externa.
+
+## Atualização do provedor LLM — 2026-07-16
+
+- O proprietário definiu a DeepSeek como provedor do LLM.
+- O commit `6557157` substituiu a implementação OpenAI Responses do LLM por
+  DeepSeek Chat Completions, mantendo a Speech API da OpenAI somente para TTS.
+- As credenciais foram separadas em `DEEPSEEK_API_KEY` e `OPENAI_API_KEY`.
+- O modelo padrão passou a `deepseek-v4-flash`, com `thinking` desabilitado para
+  a resposta falada de baixa latência.
+- A credencial fornecida não foi versionada, registrada em logs nem copiada para
+  arquivo local. A chamada real depende de a variável ser exportada no processo.

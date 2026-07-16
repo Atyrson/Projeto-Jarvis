@@ -17,7 +17,7 @@ transcrição e conteúdo dos provedores não são registrados em logs.
 - FFmpeg e ffprobe;
 - modelo Whisper configurado;
 - token compartilhado com a ESP32;
-- chave do provedor LLM/TTS para o pipeline real.
+- chave DeepSeek para LLM e chave OpenAI separada para TTS no pipeline real.
 
 ```powershell
 cd backend
@@ -39,8 +39,15 @@ $env:AUDIO_INPUT_DEVICE_TOKEN='defina-fora-do-git'
 $env:FFMPEG_BIN='C:\tmp\ffmpeg\ffmpeg-8.1.2-essentials_build\bin\ffmpeg.exe'
 $env:FFPROBE_BIN='C:\tmp\ffmpeg\ffmpeg-8.1.2-essentials_build\bin\ffprobe.exe'
 $env:STT_MODEL_DIR='C:\tmp\whisper-cache'
+$env:DEEPSEEK_API_KEY='defina-no-ambiente-seguro'
+$env:OPENAI_API_KEY='defina-no-ambiente-seguro'
 & 'C:\tmp\python312\python.exe' main.py
 ```
+
+O LLM usa por padrão `https://api.deepseek.com/chat/completions` com
+`deepseek-v4-flash`. O TTS usa a Speech API da OpenAI. As credenciais são
+independentes: nunca use `DEEPSEEK_API_KEY` como chave do TTS. O arquivo
+`.env.local` é ignorado pelo Git, mas o processo não o carrega automaticamente.
 
 ## Endpoints
 
@@ -75,6 +82,14 @@ O smoke test real do Whisper é separado:
 $env:RUN_REAL_STT='1'
 $env:STT_MODEL_DIR='C:\tmp\whisper-cache'
 python -m pytest tests\test_stt_real.py -q -m stt
+```
+
+O smoke test da DeepSeek realiza uma chamada cobrada e só roda explicitamente:
+
+```powershell
+$env:DEEPSEEK_API_KEY='defina-no-ambiente-seguro'
+$env:RUN_REAL_DEEPSEEK='1'
+python -m pytest tests\test_deepseek_real.py -q -m provider
 ```
 
 A suíte inclui unidades, ASGI, provedores HTTP simulados, TCP real fragmentado,
