@@ -5,11 +5,13 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Header, Request
+from fastapi import APIRouter, Header, Request, Body
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from services.audio_queue import AudioQueue
 from utils.pcm import strip_wav_header, validate_pcm
+
+from services.stt.whisper_transcriber import WhisperTranscriber
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -78,3 +80,17 @@ async def health(request: Request) -> dict[str, object]:
         "audio_ready": audio_queue.peek(),
         "stream_active": audio_queue.stream_active,
     }
+
+transcriber = WhisperTranscriber()
+
+@router.post("/transcribe")
+async def transcribe_audio(audio_path: str = Body(..., embed=True)): 
+    try:
+        # Passa o caminho do áudio recebido para o transcritor
+        text = transcriber.transcribe(audio_path)
+        return {"status": "success", "text": text}
+    
+    except FileNotFoundError as e:
+        return JSONResponse(status_code=404, content={str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"Erro ao transcrever": str(e)})
