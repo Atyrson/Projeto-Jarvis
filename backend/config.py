@@ -29,6 +29,13 @@ class AudioInputConfig:
     media_timeout_seconds: float = 30.0
     ffmpeg_bin: str = "ffmpeg"
     ffprobe_bin: str = "ffprobe"
+    ai_api_key: str = ""
+    ai_base_url: str = "https://api.openai.com/v1"
+    ai_timeout_seconds: float = 60.0
+    llm_model: str = "gpt-5.6-luna"
+    llm_max_output_tokens: int = 200
+    tts_model: str = "tts-1"
+    tts_voice: str = "alloy"
     allowed_mime_types: frozenset[str] = frozenset(
         {
             "audio/aac",
@@ -51,8 +58,11 @@ class AudioInputConfig:
             self.max_duration_seconds <= 0
             or self.stt_timeout_seconds <= 0
             or self.media_timeout_seconds <= 0
+            or self.ai_timeout_seconds <= 0
         ):
             raise ValueError("timeouts e duracao devem ser maiores que zero")
+        if self.llm_max_output_tokens <= 0:
+            raise ValueError("LLM_MAX_OUTPUT_TOKENS deve ser maior que zero")
 
     @classmethod
     def from_env(cls) -> "AudioInputConfig":
@@ -76,4 +86,11 @@ class AudioInputConfig:
             ),
             ffmpeg_bin=os.getenv("FFMPEG_BIN", "ffmpeg"),
             ffprobe_bin=os.getenv("FFPROBE_BIN", "ffprobe"),
+            ai_api_key=os.getenv("OPENAI_API_KEY", ""),
+            ai_base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+            ai_timeout_seconds=float(os.getenv("AI_TIMEOUT_SECONDS", "60")),
+            llm_model=os.getenv("LLM_MODEL", "gpt-5.6-luna"),
+            llm_max_output_tokens=_positive_int("LLM_MAX_OUTPUT_TOKENS", 200),
+            tts_model=os.getenv("TTS_MODEL", "tts-1"),
+            tts_voice=os.getenv("TTS_VOICE", "alloy"),
         )

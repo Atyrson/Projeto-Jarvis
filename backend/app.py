@@ -15,8 +15,20 @@ from routes.audio import router as audio_router
 from routes.audio_input import router as audio_input_router
 from models.audio_input import AudioJobStore
 from services.audio_queue import AudioQueue
+from services.audio_converter import AudioConverter
+from services.audio_pipeline import AudioPipeline, AudioTranscriptionStage
 from services.audio_upload import AudioUploadService
+from services.llm_service import (
+    LLMService,
+    OpenAIResponsesLLMService,
+    UnavailableLLMService,
+)
 from services.stt.transcription_service import Transcriber, TranscriptionService
+from services.tts_service import (
+    OpenAISpeechTTSService,
+    TTSService,
+    UnavailableTTSService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +53,8 @@ def create_app(
     audio_input_config: AudioInputConfig | None = None,
     audio_upload_service: AudioUploadService | None = None,
     audio_pipeline: object | None = None,
+    llm_service: LLMService | None = None,
+    tts_service: TTSService | None = None,
 ) -> FastAPI:
     """Cria a aplicacao com dependencias substituiveis nos testes."""
 
@@ -56,12 +70,56 @@ def create_app(
                 )
             except Exception:
                 logger.exception("event=stt.model_load_failed")
-        yield
+        if (
+            application.state.audio_pipeline is None
+            and application.state.transcription_service is not None
+        ):
+            converter = AudioConverter(config)
+            llm = llm_service
+            tts = tts_service
+            if llm is None:
+                llm = (
+                    OpenAIResponsesLLMService(config)
+                    if config.ai_api_key
+                    else UnavailableLLMService()
+                )
+            if tts is None:
+                tts = (
+                    OpenAISpeechTTSService(config)
+                    if config.ai_api_key
+                    else UnavailableTTSService()
+                )
+            stage = AudioTranscriptionStage(
+                config,
+                application.state.audio_upload_service.jobs,
+                converter,
+                application.state.transcription_service,
+            )
+            application.state.audio_pipeline = AudioPipeline(
+                config,
+                application.state.audio_upload_service.jobs,
+                stage,
+                llm,
+                tts,
+                converter,
+                application.state.audio_queue,
+            )
+        try:
+            yield
+        finally:
+            pipeline = application.state.audio_pipeline
+            shutdown = getattr(pipeline, "shutdown", None)
+            if shutdown is not None:
+                await shutdown()
 
+    config = audio_input_config or (
+        audio_upload_service.config
+        if audio_upload_service is not None
+        else AudioInputConfig.from_env()
+    )
     application = FastAPI(title="ESP32 Audio Backend", lifespan=lifespan)
     application.state.audio_queue = audio_queue or AudioQueue()
     application.state.transcription_service = transcription_service
-    config = audio_input_config or AudioInputConfig.from_env()
     application.state.audio_upload_service = audio_upload_service or AudioUploadService(
         config, AudioJobStore()
     )

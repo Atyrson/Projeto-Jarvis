@@ -4,9 +4,16 @@ from pathlib import Path
 
 import pytest
 
+from app import create_app
 from config import AudioInputConfig
 from models.audio_input import AudioJob, AudioJobStatus, AudioJobStore
-from services.audio_pipeline import AudioTranscriptionStage
+from services.audio_pipeline import (
+    AudioPipeline,
+    AudioTranscriptionStage,
+    TranscriptionStageResult,
+)
+from services.audio_queue import AudioQueue
+from services.llm_service import LLMProviderError
 from services.stt.transcription_service import Transcriber, TranscriptionService
 
 
@@ -124,5 +131,124 @@ def test_stt_failure_marks_job_and_cleans_files(tmp_path: Path) -> None:
         assert failed.error == "stt_failed"
         assert not source.exists()
         assert not list(tmp_path.glob("*.normalized.wav"))
+
+    asyncio.run(scenario())
+
+
+class FakeStage:
+    def __init__(self, root: Path) -> None:
+        self.root = root
+
+    async def execute(self, job_id: str) -> TranscriptionStageResult:
+        path = self.root / f"{job_id}.normalized.wav"
+        path.write_bytes(b"normalized")
+        return TranscriptionStageResult("transcricao secreta", path)
+
+
+class FakeLLM:
+    def __init__(self, *, fail: bool = False) -> None:
+        self.fail = fail
+        self.inputs: list[str] = []
+
+    async def generate(self, transcription: str) -> str:
+        self.inputs.append(transcription)
+        if self.fail:
+            raise LLMProviderError("failed")
+        return "resposta secreta"
+
+
+class FakeTTS:
+    def __init__(self) -> None:
+        self.inputs: list[str] = []
+
+    async def synthesize(self, text: str) -> bytes:
+        self.inputs.append(text)
+        return b"encoded wav"
+
+
+class FakeOutputConverter:
+    async def convert_to_pcm(self, source: Path, destination: Path) -> bytes:
+        assert source.read_bytes() == b"encoded wav"
+        pcm = b"\x00\x01\x02\x03"
+        destination.write_bytes(pcm)
+        return pcm
+
+
+def full_pipeline(
+    root: Path,
+    store: AudioJobStore,
+    queue: AudioQueue,
+    llm: FakeLLM,
+    tts: FakeTTS,
+) -> AudioPipeline:
+    return AudioPipeline(
+        AudioInputConfig(input_dir=root, device_token="test"),
+        store,
+        FakeStage(root),  # type: ignore[arg-type]
+        llm,
+        tts,
+        FakeOutputConverter(),  # type: ignore[arg-type]
+        queue,
+    )
+
+
+def test_full_pipeline_enqueues_pcm_and_cleans_temporary_files(
+    tmp_path: Path, caplog
+) -> None:
+    async def scenario() -> None:
+        store = AudioJobStore()
+        await accepted_job(tmp_path, store)
+        queue = AudioQueue(wait_timeout=1)
+        llm = FakeLLM()
+        tts = FakeTTS()
+        pipeline = full_pipeline(tmp_path, store, queue, llm, tts)
+
+        pipeline.submit("a" * 32)
+        await pipeline.wait("a" * 32)
+        job = await store.get("a" * 32)
+        pcm = b"".join([chunk async for chunk in queue.consume()])
+
+        assert job is not None and job.status == AudioJobStatus.QUEUED
+        assert pcm == b"\x00\x01\x02\x03"
+        assert llm.inputs == ["transcricao secreta"]
+        assert tts.inputs == ["resposta secreta"]
+        assert not list(tmp_path.iterdir())
+        assert "transcricao secreta" not in caplog.text
+        assert "resposta secreta" not in caplog.text
+
+    asyncio.run(scenario())
+
+
+def test_pipeline_failure_never_enqueues_partial_audio(tmp_path: Path) -> None:
+    async def scenario() -> None:
+        store = AudioJobStore()
+        await accepted_job(tmp_path, store)
+        queue = AudioQueue(wait_timeout=0)
+        pipeline = full_pipeline(
+            tmp_path, store, queue, FakeLLM(fail=True), FakeTTS()
+        )
+
+        await pipeline.process("a" * 32)
+        job = await store.get("a" * 32)
+        assert job is not None and job.status == AudioJobStatus.FAILED
+        assert job.error == "llm_failed"
+        assert not queue.peek()
+        assert not list(tmp_path.iterdir())
+
+    asyncio.run(scenario())
+
+
+def test_lifespan_builds_pipeline_from_injected_services(tmp_path: Path) -> None:
+    async def scenario() -> None:
+        application = create_app(
+            transcription_service=TranscriptionService(FakeTranscriber()),
+            audio_input_config=AudioInputConfig(
+                input_dir=tmp_path, device_token="test"
+            ),
+            llm_service=FakeLLM(),
+            tts_service=FakeTTS(),
+        )
+        async with application.router.lifespan_context(application):
+            assert isinstance(application.state.audio_pipeline, AudioPipeline)
 
     asyncio.run(scenario())
