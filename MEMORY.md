@@ -34,6 +34,8 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - `b94a46e` — limpeza, retenção, shutdown, carga e observabilidade.
 - `6557157` — integração DeepSeek Chat Completions como LLM.
 - `c3f0f16` — contrato, smoke test opt-in e documentação da DeepSeek.
+- `6f06aa5` — auditoria final da robustez e validação de software.
+- `ea91026` — modelo TTS padrão migrado para `gpt-4o-mini-tts`.
 
 ## Ambiente local
 
@@ -99,6 +101,8 @@ idf.py -B build-audio-cellular build
   processo. O smoke test real exige também `RUN_REAL_DEEPSEEK=1`.
 - O TTS requer outra credencial em `OPENAI_API_KEY`; a chave DeepSeek não deve
   ser reutilizada para TTS.
+- Modelo TTS padrão: `gpt-4o-mini-tts` via `POST /v1/audio/speech`; pode ser
+  sobrescrito por `TTS_MODEL`.
 - MCP oficial de documentação registrado globalmente como `openaiDeveloperDocs`;
   uma nova sessão pode ser necessária para expor suas ferramentas.
 

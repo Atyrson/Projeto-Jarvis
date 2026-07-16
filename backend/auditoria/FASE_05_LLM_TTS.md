@@ -100,3 +100,12 @@ explicitamente pendentes de credencial/configuração externa.
   a resposta falada de baixa latência.
 - A credencial fornecida não foi versionada, registrada em logs nem copiada para
   arquivo local. A chamada real depende de a variável ser exportada no processo.
+
+## Atualização do modelo TTS — 2026-07-16
+
+- Por decisão do proprietário, o commit `ea91026` alterou o modelo TTS padrão
+  de `tts-1` para `gpt-4o-mini-tts`.
+- O endpoint permanece `POST /v1/audio/speech`, com `voice`, `input` e
+  `response_format=wav`; apenas o modelo padrão foi migrado.
+- `TTS_MODEL` continua configurável por ambiente e a credencial permanece
+  separada em `OPENAI_API_KEY`.

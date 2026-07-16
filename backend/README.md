@@ -45,8 +45,9 @@ $env:OPENAI_API_KEY='defina-no-ambiente-seguro'
 ```
 
 O LLM usa por padrão `https://api.deepseek.com/chat/completions` com
-`deepseek-v4-flash`. O TTS usa a Speech API da OpenAI. As credenciais são
-independentes: nunca use `DEEPSEEK_API_KEY` como chave do TTS. O arquivo
+`deepseek-v4-flash`. O TTS usa a Speech API da OpenAI com o modelo padrão
+`gpt-4o-mini-tts`. As credenciais são independentes: nunca use
+`DEEPSEEK_API_KEY` como chave do TTS. O arquivo
 `.env.local` é ignorado pelo Git, mas o processo não o carrega automaticamente.
 
 ## Endpoints

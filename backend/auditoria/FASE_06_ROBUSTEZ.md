@@ -44,8 +44,8 @@ LLM ou corpo remoto de erro.
 
 ## Testes e resultados
 
-- Suíte rápida final: 68 aprovados, 1 teste real DeepSeek ignorado e 1 teste
-  STT real desmarcado; 4,75 s.
+- Suíte rápida final após a migração TTS: 68 aprovados, 1 teste real DeepSeek
+  ignorado e 1 teste STT real desmarcado; 16,45 s.
 - Dependências: `pip check` sem pacotes quebrados.
 - Whisper real: 1 aprovado; texto transcrito não foi registrado.
 - Upload TCP fragmentado: 25.100 bytes reconstruídos com SHA-256 idêntico.

@@ -24,3 +24,9 @@ Atualização DeepSeek:
 - messages system/user, thinking=disabled, max_tokens e stream=false verificados
 - DEEPSEEK_API_KEY e OPENAI_API_KEY são independentes
 - contrato HTTP simulado aprovado; segredo real ausente dos arquivos e logs
+
+Atualização TTS:
+- modelo padrão: gpt-4o-mini-tts
+- endpoint mantido: POST /v1/audio/speech
+- payload mantido: model, voice, input e response_format=wav
+- configuração por TTS_MODEL e autenticação por OPENAI_API_KEY
