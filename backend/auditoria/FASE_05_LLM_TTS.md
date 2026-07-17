@@ -81,8 +81,8 @@ chave ou realizar cobrança sem autorização.
 - [x] PCM é validado e entregue por `/audio/stream`.
 - [x] Falha não enfileira payload parcial e limpa temporários.
 - [x] Provedores falsos cobrem o fluxo completo.
-- [ ] Provedores reais foram executados com credencial de bancada.
-- [ ] Reprodução física foi capturada no log serial.
+- [x] Provedores reais foram executados com credencial de bancada.
+- [x] Reprodução física foi confirmada no fluxo ponta a ponta.
 
 ## Resultado final
 
@@ -109,3 +109,10 @@ explicitamente pendentes de credencial/configuração externa.
   `response_format=wav`; apenas o modelo padrão foi migrado.
 - `TTS_MODEL` continua configurável por ambiente e a credencial permanece
   separada em `OPENAI_API_KEY`.
+
+## Validação física final — 2026-07-16
+
+- Upload real de 88.726 bytes foi aceito com HTTP `202`.
+- Whisper, DeepSeek e OpenAI TTS concluíram com as credenciais locais.
+- O PCM retornou à ESP32 e o fluxo completo foi confirmado pelo proprietário.
+- Nenhuma credencial ou conteúdo do áudio foi acrescentado à auditoria.

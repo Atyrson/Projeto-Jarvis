@@ -97,6 +97,10 @@ idf.py -B build-audio-cellular build
 - Fase 6 concluída em software: cleanup e retenção periódicos, cancelamento no
   shutdown, eventos correlacionados, testes TCP de fragmentação/desconexão e
   teste de carga. Suíte final: 68 aprovados; Whisper real: 1 aprovado.
+- Fluxo físico ponta a ponta validado em 2026-07-16: celular enviou 88.726 bytes
+  pela ESP32, backend respondeu `202`, Whisper, DeepSeek e OpenAI TTS concluíram,
+  e o PCM retornou à ESP32. A falha Wi-Fi anterior era hotspot em 5 GHz; o ESP32
+  conectou após configurar o hotspot em 2,4 GHz.
 - A chave DeepSeek foi fornecida na conversa, mas não foi gravada no repositório,
   arquivo local, comando ou log. Para usá-la, exportar `DEEPSEEK_API_KEY` no
   processo. O smoke test real exige também `RUN_REAL_DEEPSEEK=1`.
@@ -128,8 +132,5 @@ idf.py -B build-audio-cellular build
 
 ## Pendências de validação física
 
-- Teste real em Android/iOS e captura da página servida pela placa.
+- Repetir o teste no segundo sistema móvel (Android ou iOS) ainda não utilizado.
 - Logs seriais, heap mínimo/inicial/final e desconexão durante upload.
-- Reprodução física no alto-falante após o pipeline completo.
-- Smoke test real da DeepSeek depois de exportar a credencial no processo.
-- TTS real depois de fornecer uma chave OpenAI separada.

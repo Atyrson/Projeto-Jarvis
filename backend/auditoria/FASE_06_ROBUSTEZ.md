@@ -119,3 +119,12 @@ explicitamente pendentes de ambiente externo.
 - O log não inclui SSID nem senha.
 - Teste de contrato: 5 aprovados.
 - Build ESP-IDF 5.5.4: aprovado, versão `2754975`, 921.248 bytes e 12% livre.
+
+## Validação ponta a ponta — 2026-07-16
+
+- A causa da associação Wi-Fi foi confirmada como hotspot em 5 GHz; a troca
+  para 2,4 GHz resolveu a conexão do ESP32.
+- Celular, proxy ESP32, upload backend, Whisper, DeepSeek, OpenAI TTS, fila PCM
+  e reprodução física concluíram o mesmo fluxo real.
+- Permanecem somente a repetição em outro sistema móvel e medições formais de
+  heap/desconexão durante upload.
