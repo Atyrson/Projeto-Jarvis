@@ -122,6 +122,8 @@ idf.py -B build-audio-cellular build
 - Preservar compatibilidade de `/queue`, `/audio/stream` e `/health`.
 - LLM padrão: `deepseek-v4-flash` via `https://api.deepseek.com/chat/completions`,
   com `thinking` desabilitado para reduzir latência da resposta falada.
+- Desconexões Wi-Fi do firmware registram `reason=<código> (<nome>)`; usar esse
+  par para distinguir AP ausente, autenticação, handshake e segurança incompatível.
 
 ## Pendências de validação física
 

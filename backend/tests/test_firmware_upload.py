@@ -7,6 +7,7 @@ WEB_SERVER = (ROOT / "main" / "web_audio_server.c").read_text(encoding="utf-8")
 PROXY = (ROOT / "main" / "audio_upload_proxy.c").read_text(encoding="utf-8")
 KCONFIG = (ROOT / "main" / "Kconfig.projbuild").read_text(encoding="utf-8")
 CMAKE = (ROOT / "main" / "CMakeLists.txt").read_text(encoding="utf-8")
+FIRMWARE = (ROOT / "main" / "http_audio_player.c").read_text(encoding="utf-8")
 
 
 def test_web_page_sends_file_directly_with_progress() -> None:
@@ -53,3 +54,13 @@ def test_firmware_configuration_and_components_are_registered() -> None:
     assert '"web_audio_server.c"' in CMAKE
     assert '"audio_upload_proxy.c"' in CMAKE
     assert "esp_http_server" in CMAKE
+
+
+def test_wifi_disconnect_log_includes_numeric_and_named_reason() -> None:
+    assert "wifi_event_sta_disconnected_t" in FIRMWARE
+    assert "event->reason" in FIRMWARE
+    assert "wifi_reason_name(reason)" in FIRMWARE
+    assert 'reason=%u (%s)' in FIRMWARE
+    assert 'return "no_ap_found"' in FIRMWARE
+    assert 'return "auth_failed"' in FIRMWARE
+    assert 'return "handshake_timeout"' in FIRMWARE

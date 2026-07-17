@@ -34,6 +34,66 @@ static dac_continuous_handle_t s_dac;
 static volatile bool s_http_receiving;
 static int s_wifi_retries;
 
+static const char *wifi_reason_name(uint8_t reason)
+{
+    switch ((wifi_err_reason_t)reason) {
+    case WIFI_REASON_UNSPECIFIED:
+        return "unspecified";
+    case WIFI_REASON_AUTH_EXPIRE:
+        return "auth_expired";
+    case WIFI_REASON_AUTH_LEAVE:
+        return "auth_leave";
+    case WIFI_REASON_DISASSOC_DUE_TO_INACTIVITY:
+        return "inactive";
+    case WIFI_REASON_ASSOC_TOOMANY:
+        return "ap_full";
+    case WIFI_REASON_ASSOC_LEAVE:
+        return "assoc_leave";
+    case WIFI_REASON_ASSOC_NOT_AUTHED:
+        return "assoc_not_authenticated";
+    case WIFI_REASON_DISASSOC_SUPCHAN_BAD:
+        return "unsupported_channel";
+    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
+        return "four_way_handshake_timeout";
+    case WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT:
+        return "group_key_update_timeout";
+    case WIFI_REASON_802_1X_AUTH_FAILED:
+        return "802_1x_auth_failed";
+    case WIFI_REASON_CIPHER_SUITE_REJECTED:
+        return "cipher_suite_rejected";
+    case WIFI_REASON_TIMEOUT:
+        return "timeout";
+    case WIFI_REASON_BEACON_TIMEOUT:
+        return "beacon_timeout";
+    case WIFI_REASON_NO_AP_FOUND:
+        return "no_ap_found";
+    case WIFI_REASON_AUTH_FAIL:
+        return "auth_failed";
+    case WIFI_REASON_ASSOC_FAIL:
+        return "assoc_failed";
+    case WIFI_REASON_HANDSHAKE_TIMEOUT:
+        return "handshake_timeout";
+    case WIFI_REASON_CONNECTION_FAIL:
+        return "connection_failed";
+    case WIFI_REASON_AP_TSF_RESET:
+        return "ap_tsf_reset";
+    case WIFI_REASON_ROAMING:
+        return "roaming";
+    case WIFI_REASON_ASSOC_COMEBACK_TIME_TOO_LONG:
+        return "assoc_comeback_too_long";
+    case WIFI_REASON_SA_QUERY_TIMEOUT:
+        return "sa_query_timeout";
+    case WIFI_REASON_NO_AP_FOUND_W_COMPATIBLE_SECURITY:
+        return "no_ap_with_compatible_security";
+    case WIFI_REASON_NO_AP_FOUND_IN_AUTHMODE_THRESHOLD:
+        return "no_ap_in_authmode_threshold";
+    case WIFI_REASON_NO_AP_FOUND_IN_RSSI_THRESHOLD:
+        return "no_ap_in_rssi_threshold";
+    default:
+        return "unknown";
+    }
+}
+
 static size_t audio_buffer_samples(void)
 {
     return ((size_t)CONFIG_AUDIO_SAMPLE_RATE * CONFIG_AUDIO_BUFFER_MS) / 1000;
@@ -51,14 +111,18 @@ static void wifi_event_handler(void *arg, esp_event_base_t base, int32_t id, voi
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
+        const wifi_event_sta_disconnected_t *event = data;
+        const uint8_t reason = event ? event->reason : 0;
         xEventGroupClearBits(s_wifi_events, WIFI_CONNECTED_BIT);
         s_http_receiving = false;
         ++s_wifi_retries;
         if (s_wifi_retries > WIFI_MAX_RETRIES) {
             s_wifi_retries = 0;
-            ESP_LOGE(TAG, "Wi-Fi ainda indisponivel; continuando as tentativas");
+            ESP_LOGE(TAG, "Wi-Fi ainda indisponivel; reason=%u (%s); continuando as tentativas",
+                     reason, wifi_reason_name(reason));
         } else {
-            ESP_LOGW(TAG, "Wi-Fi desconectado; tentativa %d/%d", s_wifi_retries, WIFI_MAX_RETRIES);
+            ESP_LOGW(TAG, "Wi-Fi desconectado; reason=%u (%s); tentativa %d/%d",
+                     reason, wifi_reason_name(reason), s_wifi_retries, WIFI_MAX_RETRIES);
         }
         esp_wifi_connect();
     } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
