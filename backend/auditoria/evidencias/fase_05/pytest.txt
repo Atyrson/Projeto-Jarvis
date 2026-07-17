@@ -1,4 +1,0 @@
-Comando: C:\tmp\python312\python.exe -m pytest tests -q -m "not stt" --basetemp .pytest_tmp -p no:cacheprovider
-
-............................................................             [100%]
-60 passed, 1 deselected in 6.33s

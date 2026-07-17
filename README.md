@@ -3,8 +3,8 @@
 Firmware ESP-IDF para um **ESP32 classico** receber audio por HTTP e reproduzir
 pelo DAC interno no GPIO25, ligado a um amplificador PAM8403.
 
-Para uma explicacao detalhada e simples do fluxo e do contrato esperado do
-backend, consulte [GUIA_FIRMWARE_E_BACKEND.md](GUIA_FIRMWARE_E_BACKEND.md).
+Para configurar e executar o backend, consulte
+[backend/README.md](backend/README.md).
 
 ## Hardware
 

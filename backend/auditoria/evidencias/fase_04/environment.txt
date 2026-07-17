@@ -1,8 +1,0 @@
-ffmpeg version 8.1.2-essentials_build-www.gyan.dev
-ffprobe version 8.1.2-essentials_build-www.gyan.dev
-Arquivo baixado: ffmpeg-release-essentials.zip
-SHA-256 publicado e medido:
-db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec
-
-Modelo Whisper armazenado fora do repositório em C:\tmp\whisper-cache.
-Binários FFmpeg armazenados fora do repositório em C:\tmp\ffmpeg.

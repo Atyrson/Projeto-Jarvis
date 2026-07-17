@@ -12,3 +12,7 @@ __pycache__/
 *.py[cod]
 .env
 .env.local
+/auditoria/
+/backend/auditoria/
+/GUIA_FIRMWARE_E_BACKEND.md
+/MEMORY.md

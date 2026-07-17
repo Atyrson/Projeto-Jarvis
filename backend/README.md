@@ -95,4 +95,4 @@ python -m pytest tests\test_deepseek_real.py -q -m provider
 
 A suíte inclui unidades, ASGI, provedores HTTP simulados, TCP real fragmentado,
 interrupção de upload, limpeza/retenção, pipeline completo com fakes e contrato
-do firmware. Evidências e desvios físicos ficam em `auditoria/`.
+do firmware.

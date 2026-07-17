@@ -1,7 +1,0 @@
-Suíte rápida:
-.....................................................                    [100%]
-53 passed, 1 deselected in 8.54s
-
-Teste real marcado stt:
-1 passed, 1 warning in 17.53s
-Aviso esperado: FP16 não suportado em CPU; Whisper usou FP32.
