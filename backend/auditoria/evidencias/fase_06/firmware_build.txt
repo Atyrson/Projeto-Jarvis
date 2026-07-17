@@ -1,9 +1,15 @@
 ESP-IDF 5.5.4
 Build dir: build-audio-cellular
 Project: http_audio_player
-Project version no artefato: b94a46e
+Project version no artefato: 2754975
 Resultado: build aprovado
 Imagem: http_audio_player.bin
-Tamanho: 920048 bytes (0xe09f0)
-Partição livre: 0x1f610 (12%)
-SHA-256: B1D41BB99E896918CD105FBAC9F9DC1754DB6A8344BE8E03B3F0745E27A7A0D3
+Tamanho: 921248 bytes (0xe0ea0)
+Partição livre: 0x1f160 (12%)
+SHA-256: 78DE4A99542E5880A4968565645A7F99DE7A3B79979881900A19327409D2CEFF
+
+Diagnóstico Wi-Fi:
+- evento WIFI_EVENT_STA_DISCONNECTED lê event->reason
+- log inclui código numérico e nome estável
+- SSID e senha não são registrados
+- 5 testes de contrato aprovados

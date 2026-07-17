@@ -103,3 +103,8 @@ Configure em `idf.py menuconfig`, no menu `HTTP audio player`:
 O token nunca é inserido na página. Não versione `sdkconfig`, pois ele pode
 conter Wi-Fi e token. Somente um upload é aceito por vez (`409` no segundo); o
 player HTTP continua em tarefa separada.
+
+Em falhas de conexão, o monitor serial mostra o motivo no formato
+`reason=<código> (<nome>)`. Os casos mais comuns são `201 (no_ap_found)`,
+`202 (auth_failed)`, `204 (handshake_timeout)` e
+`210 (no_ap_with_compatible_security)`.

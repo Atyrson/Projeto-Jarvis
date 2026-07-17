@@ -1,6 +1,7 @@
 /build/
 /build-*/
 /sdkconfig
+/sdkconfig.old
 /examples/star_wars_test/build/
 /examples/star_wars_test/sdkconfig
 *.log

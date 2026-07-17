@@ -36,6 +36,7 @@ backend, e o pipeline STT → LLM → TTS devolve PCM s16le mono 16 kHz ao playe
 - `c3f0f16` — contrato, smoke test opt-in e documentação da DeepSeek.
 - `6f06aa5` — auditoria final da robustez e validação de software.
 - `ea91026` — modelo TTS padrão migrado para `gpt-4o-mini-tts`.
+- `2754975` — log Wi-Fi passa a mostrar código e nome da desconexão.
 
 ## Ambiente local
 

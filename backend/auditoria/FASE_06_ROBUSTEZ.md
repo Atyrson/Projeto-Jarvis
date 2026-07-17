@@ -111,3 +111,11 @@ O critério de conclusão de software da Fase 6 foi atendido: sucesso, falhas,
 desconexão e shutdown têm estados e limpeza determinísticos, com testes e
 evidências reproduzíveis. Os itens físicos e as chamadas cobradas permanecem
 explicitamente pendentes de ambiente externo.
+
+## Atualização de diagnóstico Wi-Fi — 2026-07-16
+
+- O commit `2754975` passou a registrar o `reason` numérico do evento
+  `WIFI_EVENT_STA_DISCONNECTED` e um nome estável para os principais motivos.
+- O log não inclui SSID nem senha.
+- Teste de contrato: 5 aprovados.
+- Build ESP-IDF 5.5.4: aprovado, versão `2754975`, 921.248 bytes e 12% livre.
