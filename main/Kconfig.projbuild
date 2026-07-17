@@ -12,6 +12,34 @@ config AUDIO_STREAM_URL
     string "HTTP PCM stream URL"
     default "http://192.168.1.100:8000/audio/stream"
 
+config AUDIO_INPUT_URL
+    string "Backend audio input URL"
+    default "http://192.168.1.100:8000/audio/input"
+
+config AUDIO_DEVICE_TOKEN
+    string "Backend device token"
+    default ""
+
+config AUDIO_UPLOAD_MAX_BYTES
+    int "Maximum phone upload size (bytes)"
+    range 1024 52428800
+    default 10485760
+
+config AUDIO_UPLOAD_BUFFER_SIZE
+    int "Upload proxy buffer size (bytes)"
+    range 1024 16384
+    default 4096
+
+config AUDIO_UPLOAD_TIMEOUT_MS
+    int "Backend upload timeout (ms)"
+    range 5000 300000
+    default 60000
+
+config AUDIO_WEB_SERVER_PORT
+    int "Phone web server port"
+    range 1 65534
+    default 80
+
 config AUDIO_SAMPLE_RATE
     int "PCM sample rate (Hz)"
     range 8000 48000

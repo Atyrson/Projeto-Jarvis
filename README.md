@@ -5,8 +5,6 @@ voz inspirado na Amazon Alexa, rodando em um **ESP32-WROOM DevKit** com
 reprodução por um amplificador classe D e um pipeline de backend com fila de
 áudio, streaming HTTP e transcrição de voz (STT).
 
----
-
 ## 1. Visão geral
 
 O **JARVIS** reproduz, em hardware de baixo custo, o fluxo funcional de um
