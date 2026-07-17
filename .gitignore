@@ -16,3 +16,5 @@ __pycache__/
 /backend/auditoria/
 /GUIA_FIRMWARE_E_BACKEND.md
 /MEMORY.md
+/backend/DESIGN.md
+/backend/PLANO_IMPLEMENTACAO_AUDIO_CELULAR.md
