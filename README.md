@@ -6,6 +6,8 @@ o usuário grava no celular, a ESP32 encaminha o arquivo ao backend, o áudio é
 transcrito, uma resposta é gerada e a voz sintetizada é reproduzida pelo
 alto-falante conectado à ESP32.
 
+Vídeo de Apresentação: https://youtu.be/wqMMu-LJyuo
+
 ## 1. Fluxo final implementado
 
 ```text
