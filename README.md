@@ -1,3 +1,5 @@
+$env:LOAD_STT="true"
+
 # JARVIS ESP32 — Assistente de voz embarcado (áudio HTTP)
 
 Projeto **concluído**: firmware ESP-IDF + backend Python para um assistente de

@@ -22,6 +22,7 @@ class TTSService(Protocol):
 
 
 class UnavailableTTSService:
+    print("TTS INDISPOINVEL")
     async def synthesize(self, text: str) -> bytes:
         raise AIProviderNotConfigured("provedor TTS nao configurado")
 
@@ -34,6 +35,7 @@ class OpenAISpeechTTSService:
         client: httpx.AsyncClient | None = None,
     ) -> None:
         if not config.tts_api_key:
+            print("nada de chave tts")
             raise AIProviderNotConfigured("OPENAI_API_KEY ausente")
         self.config = config
         self._owns_client = client is None

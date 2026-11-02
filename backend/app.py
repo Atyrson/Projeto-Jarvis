@@ -50,7 +50,7 @@ def create_app(
     audio_queue: AudioQueue | None = None,
     transcription_service: TranscriptionService | None = None,
     transcriber_factory: Callable[[], Transcriber] | None = None,
-    load_stt: bool = False,
+    load_stt: bool | None = None,
     audio_input_config: AudioInputConfig | None = None,
     audio_upload_service: AudioUploadService | None = None,
     audio_pipeline: object | None = None,
@@ -59,45 +59,65 @@ def create_app(
     audio_cleanup_service: AudioCleanupService | None = None,
 ) -> FastAPI:
     """Cria a aplicacao com dependencias substituiveis nos testes."""
+    print("[app] create_app: iniciando")
+    if load_stt is None:
+        load_stt = os.getenv("LOAD_STT", "false").lower() == "true"
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        print("[app] lifespan: inicio")
+        print(f"[app] lifespan: load_stt={load_stt}")
+        print(f"[app] lifespan: transcription_service_inicial={application.state.transcription_service is not None}")
+        print(f"[app] lifespan: audio_pipeline_inicial={application.state.audio_pipeline is not None}")
         await application.state.audio_cleanup_service.start()
+        print("[app] lifespan: audio_cleanup_service.start concluido")
         if application.state.transcription_service is None and load_stt:
             factory = transcriber_factory or _whisper_factory
             try:
+                print("[app] lifespan: carregando transcriber")
                 transcriber = await asyncio.to_thread(factory)
+                print(f"[app] lifespan: transcriber carregado tipo={type(transcriber).__name__}")
                 application.state.transcription_service = TranscriptionService(
                     transcriber,
                     max_concurrent=int(os.getenv("STT_MAX_CONCURRENT", "1")),
                 )
+                print("[app] lifespan: transcription_service inicializada")
             except Exception:
-                logger.exception("event=stt.model_load_failed")
+                print("[app] lifespan: erro ao carregar STT")
+                import traceback
+
+                traceback.print_exc()
         if (
             application.state.audio_pipeline is None
             and application.state.transcription_service is not None
         ):
+            print("[app] lifespan: montando audio pipeline")
             converter = AudioConverter(config)
             llm = llm_service
             tts = tts_service
             if llm is None:
+                print("[app] lifespan: criando LLM padrao")
                 llm = (
                     DeepSeekChatLLMService(config)
                     if config.llm_api_key
                     else UnavailableLLMService()
                 )
+            print(f"[app] lifespan: llm={type(llm).__name__}")
             if tts is None:
+                print("[app] lifespan: criando TTS padrao")
                 tts = (
                     OpenAISpeechTTSService(config)
                     if config.tts_api_key
                     else UnavailableTTSService()
                 )
+            print(f"[app] lifespan: tts={type(tts).__name__}")
             stage = AudioTranscriptionStage(
                 config,
                 application.state.audio_upload_service.jobs,
                 converter,
                 application.state.transcription_service,
             )
+            print("[app] lifespan: stage de transcricao criada")
             application.state.audio_pipeline = AudioPipeline(
                 config,
                 application.state.audio_upload_service.jobs,
@@ -107,36 +127,48 @@ def create_app(
                 converter,
                 application.state.audio_queue,
             )
+            print("[app] lifespan: audio pipeline inicializado")
         try:
+            print("[app] lifespan: aplicacao pronta para servir")
             yield
         finally:
-            logger.info("event=service.shutdown_started component=backend")
+            print("[app] lifespan: shutdown iniciado")
             pipeline = application.state.audio_pipeline
             shutdown = getattr(pipeline, "shutdown", None)
             if shutdown is not None:
+                print("[app] lifespan: chamando shutdown do pipeline")
                 await shutdown()
+                print("[app] lifespan: shutdown do pipeline concluido")
             await application.state.audio_cleanup_service.shutdown()
-            logger.info("event=service.shutdown_completed component=backend")
+            print("[app] lifespan: shutdown da limpeza concluido")
 
     config = audio_input_config or (
         audio_upload_service.config
         if audio_upload_service is not None
         else AudioInputConfig.from_env()
     )
+    print(f"[app] config carregada: {config}")
     application = FastAPI(title="ESP32 Audio Backend", lifespan=lifespan)
     application.state.audio_queue = audio_queue or AudioQueue()
+    print(f"[app] audio_queue inicializada tipo={type(application.state.audio_queue).__name__}")
     application.state.transcription_service = transcription_service
+    print(f"[app] transcription_service inicial={transcription_service is not None}")
     application.state.audio_upload_service = audio_upload_service or AudioUploadService(
         config, AudioJobStore()
     )
+    print(f"[app] audio_upload_service inicializado tipo={type(application.state.audio_upload_service).__name__}")
     application.state.audio_cleanup_service = (
         audio_cleanup_service
         or AudioCleanupService(config, application.state.audio_upload_service.jobs)
     )
+    print(f"[app] audio_cleanup_service inicializado tipo={type(application.state.audio_cleanup_service).__name__}")
     application.state.audio_pipeline = audio_pipeline
+    print(f"[app] audio_pipeline inicial={audio_pipeline is not None}")
     application.include_router(audio_router)
     application.include_router(audio_input_router)
+    print("[app] routers incluidos")
     return application
 
-
+print("[app] importando app.py")
 app = create_app(load_stt=True)
+print("[app] app criado")

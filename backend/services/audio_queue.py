@@ -1,5 +1,4 @@
 """Fila de ultimo valor para streaming de audio PCM."""
-
 from __future__ import annotations
 
 import asyncio
@@ -28,7 +27,7 @@ class AudioQueue:
 
     async def enqueue(self, pcm: AudioChunk) -> None:
         """Armazena ``pcm`` para o proximo stream (o ultimo payload vence)."""
-
+        print("comecando a enfileirar")
         if not pcm:
             raise ValueError("payload vazio")
 

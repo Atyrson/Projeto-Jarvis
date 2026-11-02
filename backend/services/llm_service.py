@@ -29,6 +29,7 @@ class LLMService(Protocol):
 
 
 class UnavailableLLMService:
+    print("LLM INDISPONIVEL")
     async def generate(self, transcription: str) -> str:
         raise AIProviderNotConfigured("provedor LLM nao configurado")
 
